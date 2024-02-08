@@ -1,0 +1,515 @@
+\documentclass[12pt]{article}
+
+\addtolength{\hoffset}{-2.25cm}
+\addtolength{\textwidth}{4.5cm}
+\addtolength{\voffset}{-2.5cm}
+\addtolength{\textheight}{5cm}
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{15pt}
+\setlength{\itemsep}{1.5em}
+% crate rule to set leftmargin 
+\usepackage{enumitem}
+\usepackage[english]{babel}
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{amssymb}
+\DeclareMathOperator{\Tr}{Tr}
+\usepackage[colorlinks = true, linkcolor = black, citecolor = black, final]{hyperref}
+
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{wrapfig, lipsum, booktabs}
+\usepackage{ marvosym }
+\usepackage{wasysym}
+\usepackage{tikz}
+
+\newcolumntype{M}[1]{>{\raggedright\arraybackslash}m{#1}}
+
+\newcommand{\deft}[1]{
+    \begin{center}
+        \begin{tabular}{|M{3cm}|M{0.80\textwidth}|}
+            \hline
+            #1
+            \hline % Add an extra \hline for thicker lines
+        \end{tabular}
+    \end{center}
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{brown}{rgb}{0.921, 0.325, 0.078}
+
+
+% includes for libertine 
+\usepackage{libertine}
+\usepackage{eulervm}
+% \usepackage{libertinust1math}
+\usepackage[T1]{fontenc}
+
+\lstset{frame=tb,
+    language=Python,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\upshape},
+    numbers=left,
+    keywordstyle=\color{black}\bfseries,
+    breaklines=true,
+    breakatwhitespace=true,
+    mathescape=true,
+    tabsize=3
+}
+
+\usetikzlibrary{patterns}
+
+\newcommand{\ds}{\displaystyle}
+
+\setlength{\parindent}{0in}
+
+\pagestyle{empty}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+{\scshape ML } \hfill {\scshape \large Lecture 2 - Linear Models and Search} \hfill {\scshape 03.02.2024}
+ 
+\smallskip
+
+\hrule
+
+\bigskip
+
+\section{Linear Regression}
+
+A linear regression model is a linear function that maps the feature(s) to the target value. In the case of one feature, this model is a line. And the best model is the line which best fits the data.
+
+\subsection{Basic example}
+
+% include image called linregexample.png
+
+\begin{center}
+    \includegraphics[width=0.6\textwidth]{"linregexample"}
+\end{center}
+
+\subsubsection*{features}
+
+We define the set of all instaces as a matrix $\mathbf{X}$, where each row is an instance $\mathbf{x}_i \in \mathbf{X}$ and the features are columns of $\mathbf{X}$ where a feature $x_i \in \mathbf{x}$. 
+
+\subsubsection*{model with one feature}
+
+Assuming we have a single feature $x_i$ the standard linear regression model can be defined as: 
+\begin{equation}
+    f_{\mathbf{w}, \mathbf{b}} (\mathbf{x}) = \mathbf{w}x_1 + b  
+\end{equation} 
+
+Where 
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item $\mathbf{w}$ is the weight vector, which you can also just see as the slope of the line
+    \item $\mathbf{b}$ is the bias, which you can also see as the y-intercept
+    \item $x_1$ is the feature we are using 
+    \item $\mathbf{x}$ is the instance
+\end{itemize}
+
+\subsubsection*{model with multiple features}
+
+For each new feature $x_i$ we add a new weight $w_i$ to the model. The model then becomes:
+\begin{align*}
+    \text{one feature} & : f_{\mathbf{w}, \mathbf{b}} (\mathbf{x}) = \mathbf{w}x_1 + b \\
+    \text{two features} & : f_{\mathbf{w}, \mathbf{b}} (\mathbf{x}) = w_1x_1 + w_2x_2 + b \\
+    \vdots & \\
+    \text{$n$ features} & : f_{\mathbf{w}, \mathbf{b}} (\mathbf{x}) = w_1x_1 + w_2x_2 + \cdots + w_n x_n + b \\
+\end{align*}
+
+Expressed in terms of the dot product of the weight vector and the feature vector, the model becomes:
+\begin{align*}
+    f_{\mathbf{w}, \mathbf{b}} (\mathbf{x}) &= \mathbf{w}^\intercal \mathbf{x} + b & \ \text{dot product notation} \\
+    & = \sum_{i=1}^{n} w_i x_i + b & \ \text{expanded notation} \\ 
+    & = ||\mathbf{w}||\ ||\mathbf{x}|| \ \cos(\theta) + b & \ \text{geometric notation}
+\end{align*}
+
+\subsubsection*{dot product intuition} 
+
+The weights $\mathbf{w}$ represent the relative importance of each feature to the model. The dot product of the weights and the features is a measure of how much the features contribute to the model.
+
+\subsubsection*{loss function}
+
+The loss function takes the model as an argument where
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item the model maps the data to some output
+    \item the loss function maps the model to a scalar loss value
+\end{itemize}
+
+A common loss function for linear regression is the mean squared error (MSE) loss function. The MSE loss function is defined as:
+\begin{align*}
+    \text{loss}_{X, T}(p) & = \frac{1}{n}\sum_{j}{(f_p(\mathbf{x}_j) - t_j)}^2 & \text{simplified form} \\
+    \text{loss}_{X, T}(\mathbf{w}, b) & = \frac{1}{n}\sum_{j}{(\mathbf{w}^\intercal \mathbf{x}_j + b - t_j)}^2 & \text{expanded form}
+\end{align*}
+
+% create a wrap table with this column layout | c | c |
+\begin{center}
+    \begin{tabular}{|M{3cm}|M{0.80\textwidth}|}
+        \hline
+        intuition & MSE loss function returns a large value if the difference between prediction and value is large and vv. \\
+        \hline
+        residual & This is the difference between the predicted value and the target value \\
+        \hline
+        squared residual & We square the residual both to avoid negative and positive residuals cancelling out and to ensure larger residuals effect the loss more heavily than smaller residuals. \\
+        \hline
+    \end{tabular}
+\end{center}
+
+A common analogy is that values which yield larger residuals are like rubber bands that are stretched further, pulling the prediction of our model closer.\\
+
+\subsubsection*{MSE variations}
+
+Some equivalent forms of the MSE loss function are:
+\begin{align*}
+    \sum_j (f_p(\mathbf{x}^j) - y^j)^2 \\
+    \frac{1}{n}\sum_j (f_p(\mathbf{x}^j) - y^j)^2 \\
+    \frac{1}{2}\sum_j (f_p(\mathbf{x}^j) - y^j)^2 \\
+    \sqrt{\frac{1}{n}\sum_j (f_p(\mathbf{x}^j) - y^j)^2} \\
+\end{align*}
+
+\section{Linear Models and Search}
+We have the \textbf{model space} which maps all possible models to their loss value. The surface this map generates is called the \textbf{loss surface/loss landscape}.
+
+\subsection{optimization}
+
+\begin{definition}[mathematical optimization]
+    Mathematical optimization is the process of trying to find the input model $p$ that minimizes/maximizes the loss function.
+\end{definition}
+
+Formally for an input $p = \{w_1, w_2, \ldots, w_n, b\}$ the optimization problem is:
+\begin{equation}
+    \hat{p} = \arg\min_{p} \text{loss}_{X, T}(p)
+\end{equation}
+
+Which again just express that we want to find (in our example) the minimum $\hat{p}$ of the loss function.
+
+\begin{definition}[machine learning optimization]
+    Machine learning optimization is the process of trying to find the input model $p$ that minimizes/maximizes the loss function for the \textit{test data} and best generalizes to new data.
+\end{definition}
+
+\subsection{random search}
+Here we make a small step to a nearby point, if the loss goes up, we move back to the previous point, if it goes down we stay. We stop when the loss gets to a predefined level.
+
+\begin{lstlisting}[caption=random search]
+$\text{start with a random model p in model space}$
+loop:
+    $\text{generate a random model p'}$
+    if loss(p') < loss(p):
+        p = p'
+\end{lstlisting}
+
+To pick the next point we pick from the \textit{hypersphere} (e.g. a circle in 2D) with the radius $r$ and the center at the current point.
+
+\begin{definition}[convex problem]
+    A convex problem is a problem where the loss surface is convex (bowl shaped). It can be identified by the fact that if we draw a line between any two points on the surface, the line will never intersect the surface. 
+\end{definition}
+
+\subsubsection*{search for non-convex problems}
+
+For non-convex problems, so problems with multiple local minima, we can get stuck in one of the local minima. To avoid this we can use \textit{simulated annealing}.
+
+\begin{definition}[simulated annealing]
+    If the next point chosen has a higher loss then we still pick it, but only with a small probability.    
+\end{definition}
+\begin{lstlisting}[caption=simulated annealing]
+    $\text{start with a random model p in model space}$
+    loop:
+        $\text{generate a random model p'}$
+        if loss(p') < loss(p):
+            p = p'
+        else:
+            with probability q: 
+                p = p'
+\end{lstlisting}
+
+In many situations the local minima are okay and we don't need to find the global minimum. We only want to make sure that we can escape bad local minima, but this doesn't imply that all local minima are bad.
+
+\subsubsection*{variations on random search}
+
+We can vary the way we pick the next point. 
+
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item fixed radius - we can use a fixed radius for the hypersphere
+    \item random uniform - we can pick the next point from a uniform distribution
+    \item random normal - we can pick the next point from a normal distribution
+\end{itemize}
+
+\subsection{continuous vs discrete model space}
+
+\begin{definition}[continuous model space]
+    A continuous model space is a model space where between any two models there is always another model. 
+\end{definition}
+
+\begin{definition}[discrete model space]
+    A discrete model space is a model space where we don't always have another model between any two models e.g. the space of all decision trees.
+\end{definition}
+
+How we define closeness also matters. For example, in the case of a discrete model space of decision trees we can define two trees as being close if we can transform one tree to another by adding/removing a single node.
+
+\subsection{parallel search}
+
+Here we run multiple searches at the same time. We can optimize this by using methods which include a population of agents that communicate with each other called \textit{population methods}.
+
+\subsubsection*{population parallel search}
+
+\begin{definition}[population methods]
+    Population methods are methods that use a population of searching agents that communicate with each other during their search of the model space to improve the efficiency of the search.
+\end{definition}
+
+Examples of population methods are :
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item evolutionary algorithms
+    \begin{itemize}[leftmargin=*, noitemsep]
+        \item genetic algorithms
+        \item evolutionary strategies
+    \end{itemize}
+    \item particle swarm optimization
+    \item ant colony optimization
+\end{itemize}
+
+\begin{lstlisting}[caption=evolutionary algorithms]
+    $\text{start with a population of k random models}$
+    loop:
+        $\text{rank the population by loss}$
+        $\text{remove the half with the worst loss}$
+        $\text{breed a new population of k models}$
+\end{lstlisting}
+
+Some pros and cons of population methods are:
+
+\begin{center}
+    \begin{tabular}{|l|l|}
+        \hline
+        pros & cons \\
+        \hline
+        $\bullet$ are powerful & $\bullet$ can be slow \\
+        $\bullet$ its easy to parallelize & $\bullet$ can be hard to tune \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\subsection{black box optimization}
+
+\begin{definition}[black box optimization]
+    Black box optimizations are methods that only require us to compute the loss function, we don't need to know anything about the internals of the model.
+\end{definition}
+
+Some key properties of black box optimization are:
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item they are very simple 
+    \item we only need to compute loss function 
+    \item they can require many iterations 
+    \item they also work for discrete model spaces (e.g. decision trees)
+\end{itemize}
+
+\newpage
+
+\section{Gradient Descent}
+
+We start of by developing random search a bit, instead of picking a random point with the lowest loss we look at $k$ random steps near us and pick the one with the lowest loss. This is called \textit{branchnig search}.
+
+\begin{lstlisting}[caption=branching search]
+    $\text{start with a random model p in model space}$
+    loop:
+        $\text{pick k random points}\ p_i\ \text{close to } p$
+        $p'\leftarrow \arg\min_{p_i}\text{loss}(p_i)$
+        if loss(p') < loss(p):
+            p $\leftarrow$ p'
+\end{lstlisting}
+
+\subsection{gradient descent: outline}
+
+Using calculus we can find the direction in which the loss function decreases the fastest. This direction is opposite of the \textit{gradient} of the loss function.
+
+\begin{definition}[slope]
+    Slope of a linear function is how much a we move up or down for a given change to the right.
+\end{definition}
+
+\begin{definition}[tangent line]
+    The tangent line to a function at a given point is a line that touches the function at that point and has the same slope as the function at that point.    
+\end{definition}
+
+\begin{definition}[derivative]
+    The derivative of a function at a given point is the slope of the tangent line to the function at that point.
+\end{definition}
+
+Say we had a loss function $f(x) = \text{loss}(p)$ representing a simple 2D convex curve then at a point $p$. We define the slope at this point as the derivative of the loss function given the input $p$, this is denoted as $f'(p)$. The line tangent to this point is then given by the equation:
+\begin{equation}
+    g(x) = f'(p)x + b
+\end{equation}
+
+\begin{definition}[gradient descent]
+    Gradient descent is a method that uses the gradient of the loss function to iteratively move towards the minimum of the loss function. We literally `descend the gradient'.
+\end{definition}
+
+The gradient is simply a generalizes of the derivative, instead of a tangent line we have a tangent (hyper)plane. Just as the tagent line, the tangent hyperplane is an approximation of the loss function at a given point that allows us to easily find the direction of steepest ascent and descent. We formally define the gradient as:
+
+\begin{definition}[gradient]
+    The gradient of a function at a given point is a vector of slopes of the tangent hyperplanes to the loss function at that point. For a function $f$ with an input $\mathbf{x}$ the gradient is denoted as $\nabla f(\mathbf{x})$ and expressed as follows : 
+\end{definition}
+\begin{equation}
+    \nabla f(\mathbf{x}) = \left(\frac{\partial f(\mathbf{x})}{\partial x_1}, \frac{\partial f(\mathbf{x})}{\partial x_2}, \ldots, \frac{\partial f(\mathbf{x})}{\partial x_n}\right)  
+\end{equation}
+We can express the general equation for the tangent hyperplane at a point $\mathbf{p}$ as: 
+\begin{align*}
+    g(\mathbf{x}) & = f'_{x_1}(p)x_1 + f'_{x_2}(p)x_2 + \cdots + f'_{x_n}(p)x_n + b \\
+    & = \nabla f(\mathbf{p})^\intercal \mathbf{x} + b
+\end{align*}
+\subsubsection*{direction of steepest ascent and descent}
+We now want to find the diretion of steepest ascent on the local linear approximation $g(\mathbf{x})$. First we can make a few assumptions 
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item $b = 0$ - we can always shift the tangent hyperplane up or down without changing the slope
+    \item $||\mathbf{x}|| = 1$ - the magnitude of the step doesn't matter, only the direction
+    \item $\text{start} = \text{origin}$  - we can always shift the tangent hyperplane to the origin without changing the slope
+\end{itemize}
+
+This simplifies $g(\mathbf{x})$ to:
+\begin{equation}
+    g(\mathbf{x}) = \nabla f(\mathbf{p})^\intercal \mathbf{x}
+\end{equation}
+
+Since $\nabla f(\mathbf{p})$ is constant the question becomes what $\mathbf{x}$ with $||\mathbf{x}|| = 1$ maximizes the dot product $\nabla f(\mathbf{p})^\intercal \mathbf{x}$. To solve this we use the geometric definition of the dot product:
+\begin{align*}
+    \nabla f(\mathbf{p})^\intercal \mathbf{x} & = ||\nabla f(\mathbf{p})||\ ||\mathbf{x}|| \ \cos(\theta) \\
+    & = ||\nabla f(\mathbf{p})|| \ \cos(\theta)
+\end{align*}
+
+The maximum value of $\cos(\theta)$ is 1, and this occurs when $\theta = 0$. This means that the direction of steepest ascent on the tangent hyperplane is the direction of $\nabla f(\mathbf{p})$ and conversely the direction of steepest descent is $-\nabla f(\mathbf{p})$. So to move towards the minimum of the loss function we move in the direction of $-\nabla f(\mathbf{p})$.
+
+\subsection{gradient descent: algorithm}
+
+Starting at some candidate point $\mathbf{p}$ we can use the gradient to iteratively move towards the minimum of the loss function. The algorithm is as follows:
+
+\begin{lstlisting}[caption=gradient descent algorithm]
+    $\text{pick a random point } \mathbf{p} \text{ in the model space}$
+    loop:
+        $\mathbf{p} \leftarrow \mathbf{p} - \eta \nabla \text{loss}(\mathbf{p})$
+\end{lstlisting}
+
+We subtract because the gradient is pointing in the direction of steepest ascent and we want to move in the direction of steepest descent. The $\eta$ is the \textit{learning rate} 
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item it scales down the step size
+    \item its chosen by trail and error 
+    \item it stays constant throughout the search 
+\end{itemize}
+
+\subsection{gradient descent: example}
+\subsubsection*{calculating the gradient}
+Say we are using MSE as our loss function and we have a model with a single feature $x_i$. The loss function is then:
+\begin{equation}
+    \text{loss}(w, b) = \frac{1}{n}\sum_{i}{(wx_i + b - t_i)}^2
+\end{equation}
+To calculate the gradient of the loss function we need to calculate the partial derivatives of the loss function with respect to the weights and the bias. The gradient is then:
+\begin{equation}
+    \nabla \text{loss}(w, b) = \left(\frac{\partial \text{loss}(w, b)}{\partial w}, \frac{\partial \text{loss}(w, b)}{\partial b}\right)
+\end{equation}
+
+The partial derivative with respect to the weights and biases is then:
+\begin{align*}
+    \frac{\partial \text{loss}(w, b)}{\partial w} & = \frac{\partial \frac{1}{n} \sum_i (wx_i + b - t_i)^2}{\partial w} \\ 
+    & = \frac{1}{n}\sum_i \frac{\partial (wx_i + b - t_i)^2}{\partial w} \quad \text{(sum rule)} \\
+    & = \frac{1}{n}\sum_i \frac{\partial (wx_i + b - t_i)^2}{\partial (wx_i + b - t_i)}\frac{\partial (wx_i + b - t_i)^2}{\partial w} \quad \text{(chain rule)} \\ 
+    & = \frac{2}{n}\sum_i (wx_i + b - t_i)x_i \\
+    \frac{\partial \text{loss}(w, b)}{\partial b} & = \frac{\partial \frac{1}{n} \sum_i (wx_i + b - t_i)^2}{\partial b} \\
+    & = \frac{2}{n}\sum_i (wx_i + b - t_i) \quad \text{(sum rule)} \\
+\end{align*}
+\subsubsection*{example gradient descent algorithm}
+Given the gradient we computed above our gradient descent algorithm is then:
+\begin{lstlisting}[caption=gradient descent algorithm example]
+    $\text{pick a random point } (w, b) \text{ in the model space}$
+    loop:
+        $\underbrace{(w, b)}_{\text{next guess}} \leftarrow \underbrace{(w, b)}_{\text{current guess}} - \eta \underbrace{\left(\frac{2}{n}\sum_i (wx_i + b - t_i)x_i, \frac{2}{n}\sum_i (wx_i + b - t_i)\right)}_{\text{gradient}}$
+\end{lstlisting}
+
+\subsection{properties of gradient descent}
+% 2 column multicol 
+\begin{multicols}{2}
+    Some cons of gradient descent are:
+    \begin{itemize}[leftmargin=*, noitemsep]
+        \item only works for continuous model spaces
+        \begin{itemize}[leftmargin=*, noitemsep]
+            \item with smooth loss functions
+            \item for which we can compute the gradient
+        \end{itemize}
+        \item we can get stuck in local minima
+    \end{itemize}
+    \columnbreak
+    Some pros of gradient descent are:
+    \begin{itemize}[leftmargin=*, noitemsep]
+        \item it's fast and low memory
+        \item it's very accurate 
+    \end{itemize}
+    
+\end{multicols}
+
+\section{Gradient Descent and Classification}
+
+To apply gradient descent to classification we define the model using a similar functional paradigm. We have a hyperplane defined by $f_{\mathbf{w}, \mathbf{b}}(\mathbf{x})$ which separates the data into two classes. The model is then:
+\begin{equation}
+    f_{\mathbf{w}, b}(\mathbf{x}) = \mathbf{w}^\intercal \mathbf{x} + b = 
+    \begin{cases}
+        \text{class 1} & \text{if } \mathbf{w}^\intercal \mathbf{x} + b > 0 \\
+        \text{class 2} & \text{if } \mathbf{w}^\intercal \mathbf{x} + b < 0
+    \end{cases}
+\end{equation}
+
+\subsection{properties of the hyperplane}
+In 2D $f_{\mathbf{w}, \mathbf{b}}(\mathbf{x})$ describes the plane that intersects the decision boundary. The weight vector $\mathbf{w}$ is the vector perpendicular to the plane in the direction $f_{\mathbf{w}, \mathbf{b}}(\mathbf{x}) > 0$. 
+
+\subsection{discontinuous loss surface}
+
+In the case a loss surface is not smooth and continuous but instead consisting of flat regions and sharp edges we have a much harder time finding the minimum using any of the methods we have discussed.
+\deft{
+    random search & would have to do a random walk till it grind a ridge by accident \\
+    \hline 
+    gradient descent & the gradient is 0 everywhere except at the edges where its undefined so this would just break \\
+}
+
+\subsubsection*{purpose of loss function}
+
+Loss functions serve two purposes:
+\begin{enumerate}[leftmargin=*, noitemsep]
+    \item To express a quantity we want to maximize in our search for a good model 
+    \item To provide a smooth loss surface that we can use to find the path from a good model to a bad one
+\end{enumerate}
+
+\subsubsection*{solving discontinuous loss surfaces}
+
+To avoid the issue with discontinuous loss surfaces its a common practice to replace our loss function that has a minimum at (roughly) the same model but has a smooth differentiable loss surface.
+
+\subsection{types of loss functions}
+
+The types of loss functions covered in the course are 
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item least squares loss
+    \item log loss / cross entropy loss
+    \item SVM loss
+\end{itemize}
+
+\subsubsection*{least squares loss function}
+
+
+We define the least-squares loss as the sum of the squared residuals for the positive class instances and the negative class instance. We can express this as follows: 
+\begin{equation}
+    \text{loss}(\mathbf{w}, b) = \sum_{i \in \text{pos}} {(\mathbf{w}^\intercal\mathbf{x}_i+b-1)}^2 + \sum_{i \in \text{neg}} {(\mathbf{w}^\intercal\mathbf{x}_i+b+1)}^2
+\end{equation}
+
+Some observations 
+\begin{itemize}[leftmargin=*, noitemsep]
+    \item The minima between the discontinuous loss surface and the smooth loss surface are roughly the same
+    \item The smooth loss surface is differentiable everywhere so we can apply gradient descent
+\end{itemize}
+
+\end{document} 

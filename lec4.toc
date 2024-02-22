@@ -1,0 +1,25 @@
+\babel@toc {english}{}
+\contentsline {section}{\numberline {1}Learning}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The machine analogy}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Frequentist learning}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Log-likelihood (loss)}{2}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Maxmium likelihood for normal distribution}{3}{subsection.1.4}%
+\contentsline {subsection}{\numberline {1.5}Bayesian learning}{4}{subsection.1.5}%
+\contentsline {subsection}{\numberline {1.6}Bayesian vs Frequentist applied}{5}{subsection.1.6}%
+\contentsline {section}{\numberline {2}Naive Bayes Classifier}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Bayes classifier}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Naive Bayes classifier}{6}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Logistic regression}{8}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Logistic sigmoid function}{8}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Logistic regression model}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Logarthmic loss}{9}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Logistic regression application summary}{11}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Logistic regression overall summary}{11}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Information theory}{11}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Probabilities and codes}{11}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Codelengths}{12}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}entropy}{12}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Cross-entropy}{13}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Generalizing to continous and discrete space}{14}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Log loss as cross-entropy loss}{14}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Minimum Description Length principle (MDL)}{14}{subsection.4.7}%

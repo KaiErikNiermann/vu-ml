@@ -6,3 +6,6 @@
 *.out
 *.fdb_latexmk
 *.synctex.gz
+
+# misc 
+tmp*

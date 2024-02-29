@@ -10,3 +10,7 @@
 
 # misc 
 tmp*
+
+#poetry 
+poetry.lock
+.venv

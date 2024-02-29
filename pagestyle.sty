@@ -49,12 +49,17 @@
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \definecolor{brown}{rgb}{0.921, 0.325, 0.078}
 
+\usetikzlibrary{graphs, graphs.standard}
 
 % includes for libertine 
 \usepackage{libertine}
 \usepackage{eulervm}
 % \usepackage{libertinust1math}
 \usepackage[T1]{fontenc}
+
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
 
 \lstset{frame=tb,
     language=Python,

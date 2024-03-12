@@ -1,3 +1,12 @@
-# vu-ml
+# vu-ml notes
 
-For the machine learning course I kinda mixed my notes doing some in LaTeX for the more math heavy topics and the rest on notion. This is just the latex notes, if you want to find the latex notes and the notion notes, that is, the entire notes for the course they are [here](https://applesauce-notes.notion.site/Machine-Learning-f2782a8d0c3341d595c4bc1526c330a8?pvs=4).
+These are some latex notes for the more math heavy lectures of the [machine learning course](https://mlvu.github.io/) taught for undergrads at VU Amsterdam. [Here](https://lausta.notion.site/f2782a8d0c3341d595c4bc1526c330a8?pvs=25) are the full notes (which include these). 
+
+
+## contributing 
+
+If you spot any errors feel free to create an issue and I will fix them asap.
+
+## citation 
+
+As these are course notations most of the content obviously comes from the course, there is some original work in here aswell. Here is the link to the machine learning website : mlvu.github.io 

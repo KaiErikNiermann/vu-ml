@@ -2,6 +2,17 @@
 
 These are some latex notes for the more math heavy lectures of the [machine learning course](https://mlvu.github.io/) taught for undergrads at VU Amsterdam. [Here](https://lausta.notion.site/f2782a8d0c3341d595c4bc1526c330a8?pvs=25) are the full notes (which include these). 
 
+## notes 
+
+- `lec0-prob.pdf` : very basic probability essentials
+- `lec2.pdf` : linear models and search
+- `lec4.pdf` : probalistic models
+- `lec6.pdf` : neural networks and backpropagation 
+
+### additional 
+
+- `cond-ent.pdf` : an unecessarily long explanation to conditional entropy and its application, based in part of [these slides](https://www.inf.ed.ac.uk/teaching/courses/fmcs1/slides/lecture25.pdf)
+
 
 ## contributing 
 

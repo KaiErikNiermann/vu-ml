@@ -83,7 +83,7 @@ An important observation to make is that the only difference between conditional
 \[
     L(o\mid g) = -\log p(o\mid g) = -\log \frac{1}{p(g)}p(o, g)
 \]
-So we can see the only difference between conditional and joint entropy is the factor of $\frac{1}{p(g)}$ in the code length. What this factor does it that it reduces the space of possibilities down to the occurences down to those where the conditioned variable occurs. 
+So we can see the only difference between conditional and joint entropy is the factor of $\frac{1}{p(g)}$ in the code length. What this factor does it that it reduces the sample space of the random variable $G$ to the instance where $G = g$, so we only consider within the space of $G = g$.
 
 \smallskip
 Bringing this back now to the main point, in a decision tree we want to minimize the conditional entropy of the outcomes ($O$) given the features (e.g. $G$).

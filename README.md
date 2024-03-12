@@ -14,6 +14,10 @@ These are some latex notes for the more math heavy lectures of the [machine lear
 - `cond-ent.pdf` : an unecessarily long explanation to conditional entropy and its application, based in part of [these slides](https://www.inf.ed.ac.uk/teaching/courses/fmcs1/slides/lecture25.pdf)
 
 
+### template
+
+If you are curious about the template checkout `template`, and specifically `template/pagestyle.sty`
+
 ## contributing 
 
 If you spot any errors feel free to create an issue and I will fix them asap.

@@ -1,0 +1,171 @@
+\documentclass[12pt]{article}
+\usepackage{pagestyle}
+
+\begin{document}
+\thispagestyle{empty}
+
+{\scshape ML } \hfill {\scshape \large Training VAE} \hfill {\scshape 20.02.2024}
+ 
+\smallskip
+\hrule
+\bigskip
+
+\begin{align*}
+    D_{KL}(q_\phi(\bvec z \mid \bvec x) \mid\mid p_\theta(\bvec z\mid \bvec x)) &= \EX_{q_\phi(\bvec z \mid \bvec x)}\left[\log\frac{q_\phi(\bvec z \mid \bvec x)}{p_\theta(\bvec z \mid \bvec x)}\right] 
+    \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)}\left[ \log\frac{q_\phi(\bvec z\mid \bvec x)p_\theta(\bvec x)}{p_\theta(\bvec x, \bvec z)} \right] \quad \text{since } p_\theta(\bvec z\mid \bvec x) = \frac{p_\theta(\bvec x, \bvec z)}{p_\theta(\bvec x)} 
+    \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)}\left[ \log\frac{q_\phi(\bvec z\mid \bvec x)}{p_\theta(\bvec x, \bvec z)} \right] + \EX_{q_\phi(\bvec z\mid \bvec x)}\left[\log p_\theta(\bvec x)\right] 
+    \\
+    &= -\underbrace{
+        \EX_{q_\phi(\bvec z\mid \bvec x)}
+        \left[
+            \log\frac{p_\theta(\bvec x, \bvec z)}{q_\phi(\bvec z \mid \bvec x)} 
+        \right]
+        }_{
+            \mathcal L_\theta, \phi(\mathbf x)
+        } + \log p_\theta(\bvec x) \\
+\end{align*}
+
+Now in a simplified form we can say that
+
+\begin{equation}
+    D_{KL}(q_\phi(\bvec z \mid \bvec x) \mid\mid p_\theta(\bvec z\mid \bvec x)) = -\mathcal L_{\theta, \phi}(\mathbf x) + \log p_\theta(\bvec x)
+\end{equation}
+
+Some observations about the 3 terms, starting off with the KL divergence $D_{KL}$, this is a distance so we know that $D\geq 0$. 
+\smallskip 
+
+The last term represents the \textit{evidence} since its a log of a probability the result will be negative, that is, $\log p_\theta(\bvec x) < 0$. 
+\smallskip
+
+From the two facts above we know that to minimze the KL divergence we want to maximize the evidence lower bound (ELBO) $\mathcal L_{\theta,\phi}(\bvec x)$. Expressed formally we want to find the parameters such that 
+
+\begin{align*}
+    \theta^*, \phi^*=\arg\max_{\theta,\phi}\mathcal L _{\theta, \phi}(\bvec x)    
+\end{align*}
+
+To understand what the ELBO is we can decompose the term into two more meaningful parts using the following derivation 
+
+\begin{align*}
+    \mathcal L_{\theta, \phi}(\bvec x) &= \EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log \frac{p_\theta(\bvec x, \bvec z)}{q_\phi(\bvec z\mid \bvec x)} \right] \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log p_\theta(\bvec x\mid \bvec z) \frac{p_\theta(\bvec z)}{q_\phi(\bvec z \mid \bvec x)}\right] \quad (\text{bayes rule})\\ 
+    &= \underbrace{\EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log p_\theta(\bvec x\mid \bvec z) \right]}_{\text{reconstruction error}} + \underbrace{\EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log \frac{p_\theta(\bvec z)}{q_\phi(\bvec z\mid \bvec x)}\right]}_{\text{regularization term}}
+\end{align*}
+
+The first term is the reconstruction error, remember that $p_\theta(\bvec x \mid \bvec z)$ is just a parameterized distribution, such as a normal distribution, so for example we have that 
+\[
+    p_\theta(\bvec x \mid \bvec z) = N(\bvec x \mid \mu_\theta(\bvec x'), \bvec \Sigma^2_\theta(\bvec x'))    
+\] 
+
+\textit{A quick sidenote}, I've seen a fair bit of different notation used to describe parameterized distributions, I think all that matters is that its understood that the mean (first) term just says that the multivariate (normal) distribution is centered around whatever this term is, and the second term is just the variance in all directions, its sometimes also shown as $\eta \bvec I$ where $\eta$ is some scalar describing the variance and $\bvec I$ is the identity matrix, so its describing the variance in all directions.
+\smallskip
+
+Now to answer the main question, how is that first term the reconstruction loss, or more accurately the expected reconstruction loss. We can create the following derivation.
+\begin{align*}
+    \ln p_\theta(\bvec x \mid \bvec z) &= \ln \left( \frac{\exp[-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2]}{\sigma\sqrt{2\pi}}\right) \\
+    &= -\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2 - \ln(\sigma\sqrt{2\pi}) \\ 
+    &= -\frac{1}{2\sigma}(x-\mu)^2 - \ln(\sigma\sqrt{2\pi}) \\
+\end{align*}
+
+One thing you might see now is that this term represents the l2 loss, or the squared loss, which is a similar idea to the basic mean square error in that we are computed the error just as the difference of the model output and the input. So intuitively we want to minimize this term to get the best reconstruction.
+\smallskip
+
+Moving on we still have the regularization term to understand. It might look a bit weird at first but its simply the KL divergence between the prior, that is the \textit{assumed distribution} of the latent space and the approximated distribution of the latent space for a given input $q_\phi(\bvec z\mid \bvec x)$. So we can say 
+\[
+    \EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log \frac{p_\theta(\bvec z)}{q_\phi(\bvec z\mid \bvec x)}\right] = D_{KL}(q_\phi(\bvec z\mid \bvec x) \mid\mid p_\theta(\bvec z))    
+\]
+
+A common choice for the assumed prior is the standard MVN, so $N(\bvec 0, \bvec I)$, where $\bvec 0$ is the zero vector and $\bvec I$ is the identity matrix. Meaning we rewrite the above KL divergence as 
+\[
+    D_{KL}(q_\phi(\bvec z\mid \bvec x) \mid\mid N(\bvec 0, \bvec I))    
+\]
+
+To quickly recap, the objective when training a VAE is to maximize the ELBO (or equivelantly minimize the negative ELBO). If we phrase this in terms of a loss function we can say that we want to minimize the following loss function 
+\[
+    \text{loss}(q_\phi, p_\theta) = -\mathcal L_{\theta, \phi}(\bvec x) = -\EX_{q_\phi(\bvec z\mid \bvec x)} \left[\log p_\theta(\bvec x \mid \bvec z') \right] + D_{KL}(q_\phi(\bvec z\mid \bvec x) \mid\mid N(\bvec 0, \bvec I))    
+\]
+Remember that all we've done here is just restate the ELBO as a loss function to minimize, nothing else.
+\smallskip 
+
+Now that we have a loss function we have to naturally ask how do we find the gradient of this loss function with respect to the parameters $\theta$ and $\phi$, since these are the ones we intend to optimze. Firstly we can rewrite our ELBO in a form that makes it easier to differentiate, that is
+\[
+    \mathcal L_{\theta, \phi}(\bvec x) = \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right]  
+\]
+Now taking the gradient with respect to $\theta$ we get
+\begin{align*}
+    \nabla_\theta \mathcal L _{\theta, \phi}(\bvec x) &= \nabla \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right] \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \nabla_\theta (log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x))\ \right] \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \nabla_\theta \log p_\theta(\bvec x, \bvec z)\right]\quad (\text{constant rule}) \\ 
+    &= \int \nabla_\theta \log p_\theta(\bvec x, \bvec z)q_\phi(\bvec z\mid \bvec x) d\bvec z
+\end{align*}
+
+Since we generally can't compute this integral easily we tend to approximate it using for example Monte Carlo sampling, that is to say we just approximate it by literally sampling $\bvec z \sim q_\phi(\bvec z\mid \bvec x)$ and then computing the gradient at that point. Which gives the following approximation
+\[
+    \nabla_\theta \mathcal L_{\theta, \phi}(\bvec x) \approx \frac{1}{L}\sum_{l=1}^L \nabla_\theta \log p_\theta(\bvec x, \bvec z^{(l)})    
+\]
+
+So now that we have a way to compute that we can move on to the gradient with respect to $\phi$. It starts out same as before 
+\[
+    \nabla_\phi \mathcal L_{\theta, \phi}(\bvec x) = \nabla_\phi \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right]    
+\]
+
+The issue now is, we were computing the gradient with respect to $\phi$ and we have $q_\phi(\bvec z\mid \bvec x)$ as an `argument' to the expectation, putting the gradient inside the expectation is simply not equivalent due to the fact that we end up not capturing the gradient for the probability distribution we are computing the expectation over. Or more formally 
+\begin{align*}
+    \nabla_\phi \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right] &= \nabla_\phi \left( \int \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right]q_\phi(\bvec z\mid \bvec x) d\bvec z \right) \\
+\end{align*}
+Whereas if we put the gradient inside the expectation we get
+\[
+    \EX_{q_\phi(\bvec z\mid \bvec x)} \left[ \nabla_\phi (\log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x))\right] = \int \nabla_\phi \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z \mid \bvec x)\right]q_\phi(\bvec z\mid \bvec x) d\bvec z    
+\]
+
+Put more simply, due to the dependence of the expectation on $\phi$ the complexity of computing the gradient is higher because we must compute the gradient with respect to the entire expectation, as opposed to the case with $\theta$ where we could just move the gradient inside the expectation.
+\smallskip 
+
+One key thing we want to do is get rid of this dependence on $\phi$ one way of doing this is to use the reparametrization trick. The idea is to rewrite the expectation in a way that we can move the gradient inside the expectation. We do this by first separating out the random component that generates $q_\phi(\bvec z\mid \bvec x)$ from the deterministic components that depend on $\bvec z$, formally we can say 
+\begin{align*}
+    q_\theta(\bvec z\mid \bvec x) &= N(\bvec z \mid \mu_\phi(\bvec x), \bvec \Sigma_\phi(\bvec x)) \\
+    &= \mu_\phi(\bvec x) + \bvec \Sigma_\phi(\bvec x)\bvec e \quad \text{where } \bvec e \sim N(\bvec 0, \bvec I) \\ 
+    &= g_\phi(\bvec x, \bvec e) \\ 
+    &= \bvec z    
+\end{align*}
+
+With this form we can rewrite the ELBO as 
+\[
+    \mathcal L_{\theta, \phi}(\bvec x) = \EX_{p(\bvec e)} \left[ \log p_\theta(\bvec x, \bvec z) - \log q_\phi(\bvec z\mid \bvec x)\right]
+\]
+
+A sample estimator of this ELBO is then 
+\[
+    \tilde{\mathcal L}_{\theta, \phi} = \log_\theta(\bvec x, \bvec z^{(i)}) - \log q_\phi(\bvec z^{(i)}\mid \bvec x) \quad \text{where } \bvec z^{(i)} = g_\phi(\bvec x, \bvec e^{(i)}) \text{ and } \bvec e^{(i)} \sim N(\bvec 0, \bvec I)
+\]
+Meaning we can rewrite our ELBO as 
+\[
+    \EX_{p(\bvec e)} \left[ \tilde{\mathcal L}_{\theta, \phi}(\bvec x) \right] = \mathcal L_{\theta, \phi}(\bvec x)
+\]
+Thus if we want the gradient we can now use the same approach as before, since we know how to compute the gradient at specific samples, and since we know that we can use the expectation of the these sample gradients to compute the gradient of the ELBO we can finally derive the following 
+
+\begin{align*}
+    \EX_{p(\bvec e)} \left[\nabla _{\theta, \phi}\tilde{\mathcal L}_{\theta, \phi}(\bvec x)\right] = \nabla_{\theta, \phi}\mathcal L_{\theta, \phi}(\bvec x)
+\end{align*}
+
+With this reparametrization trick we can now rewrite our loss as 
+\[
+    \text{loss}(q_\phi, p_\theta) = D_{KL}(q_\phi(\bvec z\mid \bvec x) \mid\mid N(\bvec 0, \bvec I)) - \EX_{p(\bvec e)} \left[ \log p_\theta(\bvec x \mid \bvec e\times \sigma_\phi(\bvec x) + \mu_\phi(\bvec x)) \right]
+\]
+
+Some questions I had were for example, how exactly do we have 
+\[
+    \EX_{p(\bvec e)}[f(\bvec z)] = \EX_{q_\phi(\bvec z\mid \bvec x)}[f(\bvec z)]   
+\]
+So lets prove this equality 
+\begin{align*}
+    \EX_{p(\bvec e)}[f(\bvec z)] &= \int f(\bvec z)p(\bvec e)d\bvec e \\
+    &= \int f(\mu_\phi(\bvec x) + \bvec \Sigma_\phi(\bvec x)\bvec e)N(\bvec 0, \bvec I)d\bvec e \\
+    u &= \bvec \Sigma_\phi(\bvec x)\bvec e + \mu_\phi(\bvec x) \quad du = \frac{1}{\bvec \Sigma\phi(\bvec x)}d\bvec e \\
+    &= \int f(u)\frac{1}{\bvec \Sigma\phi(\bvec x)\sqrt{2\pi}}\exp\left(-\frac{(u-\mu_\phi(\bvec x))^2}{2\bvec \bvec \Sigma\phi(\bvec x)}\right)du\\
+    &= \int f(u)N(u\mid \mu_\phi(\bvec x), \bvec \Sigma_\phi(\bvec x))du \\
+    &= \EX_{q_\phi(\bvec z\mid \bvec x)}[f(\bvec z)]
+\end{align*}
+
+\end{document}

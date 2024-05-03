@@ -1,0 +1,13 @@
+x1,x2,x3,x4,y
+A,A,A,B,Yes
+A,A,B,A,Yes
+A,A,A,B,Yes
+A,A,B,A,Yes
+B,B,A,B,No
+A,B,A,B,Yes
+B,A,A,B,No
+A,B,B,A,Yes
+B,A,B,A,No
+B,B,A,B,No
+B,B,B,A,No
+B,B,B,A,No
